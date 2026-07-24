@@ -671,6 +671,10 @@ The model was initially trained for 10 epochs in order to verify that the comple
 | 10 | 81.18% | 0.4202 | 85.36% | 0.3394 | 0.0010 |
 
 
+| Metric | Value |
+|---|---:|
+| Test Accuracy | **86.00%** |
+| Test Loss | **0.3313** |
 
 
 
@@ -779,8 +783,15 @@ The model was initially trained for 10 epochs in order to verify that the comple
 | Matplotlib | Visualization |
 
 
-| Metric | Value |
-|---|---:|
-| Test Accuracy | **86.00%** |
-| Test Loss | **0.3313** |
 
+
+
+## Training Results (Transfer Learning)
+
+| Epoch | Train Accuracy | Validation Accuracy | Train Loss | Validation Loss | Learning Rate |
+|---|---|---|---|---|---|
+| 1 | 55.73% | 64.05% | 0.6797 | 0.6341 | 0.0010 |
+| 2 | 62.72% | 63.92% | 0.6442 | 0.6341 | 0.0010 |
+| 3 | 66.41% | 72.72% | 0.6192 | 0.5562 | 0.0010 |
+| 4 | 69.35% | 69.33% | 0.5871 | 0.5702 | 0.0010 |
+| 5 | 71.81% | 76.77% | 0.5585 | 0.4780 | 0.0010 |
