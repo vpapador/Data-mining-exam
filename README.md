@@ -521,7 +521,6 @@ plt.title("Loss")
 
 plt.legend()
 
-
-
 plt.show()
+
 ```
