@@ -694,3 +694,541 @@ The model was initially trained for 10 epochs in order to verify that the comple
 | 3 | 66.41% | 72.72% | 0.6192 | 0.5562 | 0.0010 |
 | 4 | 69.35% | 69.33% | 0.5871 | 0.5702 | 0.0010 |
 | 5 | 71.81% | 76.77% | 0.5585 | 0.4780 | 0.0010 |
+
+
+
+
+## # Transfer Learning
+
+
+```
+
+
+# =====================================================
+# Cats vs Dogs Classification using MobileNetV2
+# Transfer Learning
+# =====================================================
+
+
+# ==========================
+# Libraries
+# ==========================
+
+import tensorflow as tf
+
+import numpy as np
+import os
+
+import matplotlib.pyplot as plt
+
+
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
+
+from tensorflow.keras.applications import MobileNetV2
+
+from tensorflow.keras import layers, models
+
+from tensorflow.keras.callbacks import (
+    EarlyStopping,
+    ReduceLROnPlateau
+)
+
+
+# ==========================
+# Dataset paths
+# ==========================
+
+
+base_dir = '/root/.keras/datasets/cats_and_dogs'
+
+
+train_dir = os.path.join(
+    base_dir,
+    'train'
+)
+
+
+validation_dir = os.path.join(
+    base_dir,
+    'validation'
+)
+
+
+test_dir = os.path.join(
+    base_dir,
+    'test'
+)
+
+
+
+print(train_dir)
+print(validation_dir)
+print(test_dir)
+
+
+
+# ==========================
+# Parameters
+# ==========================
+
+
+IMG_SIZE = (160,160)
+
+BATCH_SIZE = 32
+
+EPOCHS = 10
+
+
+
+# ==========================
+# Data Augmentation
+# ==========================
+
+
+train_datagen = ImageDataGenerator(
+
+    rescale=1./255,
+
+    rotation_range=40,
+
+    width_shift_range=0.2,
+
+    height_shift_range=0.2,
+
+    shear_range=0.2,
+
+    zoom_range=0.2,
+
+    horizontal_flip=True,
+
+    fill_mode='nearest'
+
+)
+
+
+
+validation_datagen = ImageDataGenerator(
+
+    rescale=1./255
+
+)
+
+
+
+test_datagen = ImageDataGenerator(
+
+    rescale=1./255
+
+)
+
+
+
+# ==========================
+# Data Generators
+# ==========================
+
+
+train_generator = train_datagen.flow_from_directory(
+
+    train_dir,
+
+    target_size=IMG_SIZE,
+
+    batch_size=BATCH_SIZE,
+
+    class_mode='binary'
+
+)
+
+
+
+validation_generator = validation_datagen.flow_from_directory(
+
+    validation_dir,
+
+    target_size=IMG_SIZE,
+
+    batch_size=BATCH_SIZE,
+
+    class_mode='binary'
+
+)
+
+
+
+test_generator = test_datagen.flow_from_directory(
+
+    test_dir,
+
+    target_size=IMG_SIZE,
+
+    batch_size=BATCH_SIZE,
+
+    class_mode='binary',
+
+    shuffle=False
+
+)
+
+
+
+print(
+    train_generator.class_indices
+)
+
+
+
+# =====================================================
+# MobileNetV2 Transfer Learning Model
+# =====================================================
+
+
+base_model = MobileNetV2(
+
+    input_shape=(160,160,3),
+
+    include_top=False,
+
+    weights='imagenet'
+
+)
+
+
+
+# Freeze pretrained layers
+
+base_model.trainable = False
+
+
+
+model = models.Sequential([
+
+
+    base_model,
+
+
+    layers.GlobalAveragePooling2D(),
+
+
+    layers.Dense(
+
+        128,
+
+        activation='relu'
+
+    ),
+
+
+    layers.Dropout(0.5),
+
+
+    layers.Dense(
+
+        1,
+
+        activation='sigmoid'
+
+    )
+
+])
+
+
+
+# ==========================
+# Compile
+# ==========================
+
+
+model.compile(
+
+    optimizer=tf.keras.optimizers.Adam(
+
+        learning_rate=0.0001
+
+    ),
+
+    loss='binary_crossentropy',
+
+    metrics=['accuracy']
+
+)
+
+
+
+model.summary()
+
+
+
+# ==========================
+# Callbacks
+# ==========================
+
+
+early_stop = EarlyStopping(
+
+    monitor='val_loss',
+
+    patience=5,
+
+    restore_best_weights=True,
+
+    verbose=1
+
+)
+
+
+
+lr_reduce = ReduceLROnPlateau(
+
+    monitor='val_loss',
+
+    factor=0.3,
+
+    patience=3,
+
+    verbose=1
+
+)
+
+
+
+# ==========================
+# Training
+# ==========================
+
+
+history = model.fit(
+
+    train_generator,
+
+    epochs=EPOCHS,
+
+    validation_data=validation_generator,
+
+    callbacks=[
+
+        early_stop,
+
+        lr_reduce
+
+    ]
+
+)
+
+
+
+# ==========================
+# Test Evaluation
+# ==========================
+
+
+test_loss, test_acc = model.evaluate(
+
+    test_generator
+
+)
+
+
+
+print()
+
+print(
+    "Test Accuracy:",
+    test_acc
+)
+
+
+print(
+    "Test Loss:",
+    test_loss
+)
+
+
+
+# =====================================================
+# Training Curves
+# =====================================================
+
+
+plt.figure(figsize=(12,5))
+
+
+# Accuracy
+
+plt.subplot(1,2,1)
+
+
+plt.plot(
+
+    history.history['accuracy'],
+
+    label='Training'
+
+)
+
+
+plt.plot(
+
+    history.history['val_accuracy'],
+
+    label='Validation'
+
+)
+
+
+
+plt.title(
+    "MobileNetV2 Accuracy"
+)
+
+
+plt.xlabel(
+    "Epoch"
+)
+
+
+plt.ylabel(
+    "Accuracy"
+)
+
+
+plt.legend()
+
+
+
+# Loss
+
+plt.subplot(1,2,2)
+
+
+
+plt.plot(
+
+    history.history['loss'],
+
+    label='Training'
+
+)
+
+
+plt.plot(
+
+    history.history['val_loss'],
+
+    label='Validation'
+
+)
+
+
+
+plt.title(
+    "MobileNetV2 Loss"
+)
+
+
+plt.xlabel(
+    "Epoch"
+)
+
+
+plt.ylabel(
+    "Loss"
+)
+
+
+plt.legend()
+
+
+
+plt.show()
+
+
+
+# =====================================================
+# Optional Fine Tuning
+# =====================================================
+
+
+print("\nStarting Fine Tuning...\n")
+
+
+
+# Unfreeze base model
+
+base_model.trainable = True
+
+
+
+# Freeze all except last 30 layers
+
+for layer in base_model.layers[:-30]:
+
+    layer.trainable = False
+
+
+
+
+model.compile(
+
+    optimizer=tf.keras.optimizers.Adam(
+
+        learning_rate=1e-5
+
+    ),
+
+    loss='binary_crossentropy',
+
+    metrics=['accuracy']
+
+)
+
+
+
+
+fine_history = model.fit(
+
+    train_generator,
+
+    epochs=10,
+
+    validation_data=validation_generator,
+
+    callbacks=[
+
+        early_stop,
+
+        lr_reduce
+
+    ]
+
+)
+
+
+
+# ==========================
+# Final Test Evaluation
+# ==========================
+
+
+final_loss, final_acc = model.evaluate(
+
+    test_generator
+
+)
+
+
+
+print()
+
+print(
+    "Final Test Accuracy after Fine Tuning:",
+    final_acc
+)
+
+
+print(
+    "Final Test Loss:",
+    final_loss
+)
+
+```
