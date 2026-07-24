@@ -1,6 +1,17 @@
 # Data-mining-exam
 
-## Loading the libraries
+## Cats vs Dogs Image Classification using Convolutional Neural Networks (CNN)
+
+This project implements a Convolutional Neural Network (CNN) for binary image classification using the Microsoft Cats and Dogs dataset.
+
+The objective is to distinguish between images of cats and dogs while applying the complete deep learning workflow, including data cleaning, preprocessing, data augmentation, model training, and evaluation.
+
+The implementation was developed using TensorFlow and Keras.
+
+## Libraries
+Before building the CNN model, the required Python libraries are imported.
+TensorFlow is used to create and train the neural network, while additional libraries are used for image preprocessing, dataset management, visualization, and evaluation.
+
 ```
 import tensorflow as tf
 print(tf.__version__)
@@ -33,7 +44,10 @@ from sklearn.model_selection import train_test_split
 
 ```
 
-## Load the dataset
+## Downloading the Dataset
+The dataset is downloaded directly from Microsoft's official source using TensorFlow utilities.
+
+Downloading the dataset programmatically makes the notebook fully reproducible, allowing anyone to execute it without manually downloading the files.
 
 ```
 dataset_url = (
@@ -54,7 +68,9 @@ print(os.path.dirname(dataset_path))
 
 ```
 
-## Dataset paths
+## Dataset Organization
+The original dataset stores cats and dogs inside separate folders.
+The following paths are defined so that the preprocessing stage can easily access every image.
 
 ```
 base_original = '/root/.keras/datasets/cats_and_dogs_filtered_extracted/PetImages'
@@ -63,9 +79,12 @@ cats_dir = os.path.join(base_original, 'Cat')
 dogs_dir = os.path.join(base_original, 'Dog')
 ```
 
-## Clean the dataset
+## Dataset Cleaning
 
-I first openned the zip file on my computer and noticed that each folder contains some broken files
+The Cats and Dogs dataset contains a number of corrupted image files that cannot be opened correctly.
+
+These files would interrupt the training process, therefore every image is verified using the Python Imaging Library (PIL). Invalid images are automatically discarded before creating the final dataset.
+
 ```
 output_dir = '/root/.keras/datasets/cats_and_dogs'
 
@@ -106,7 +125,14 @@ def valid_image(path):
 
 ```
 
-## Then we split the dataset 
+## Creating the Dataset Splits
+After removing corrupted images, the valid images are randomly divided into three subsets:
+
+70% Training
+15% Validation
+15% Testing
+
+Using separate datasets allows the model to learn from one subset while being evaluated on unseen data.
 
 ```
 def split_and_copy(source_dir, class_name):
@@ -205,7 +231,12 @@ split_and_copy(
 
 ```
 
-## We set the directories
+## Dataset Directories
+
+The newly created folders are assigned to variables that will later be used by TensorFlow's data generators.
+
+Separating the dataset into training, validation and testing directories follows the standard deep learning workflow.
+
 
 ```
 base_dir = output_dir
@@ -240,7 +271,16 @@ print(
 
 ```
 
-## Ready for data augmentation
+## Data Augmentation
+
+To improve the model's ability to generalize, several image transformations are applied during training.
+
+Instead of repeatedly showing the exact same images, random modifications such as rotations, zooming, translations and horizontal flipping generate new image variations on every epoch.
+
+This helps reduce overfitting and improves robustness.
+
+Validation and test images are only normalized because they must represent unseen data.
+
 
 ```
 
@@ -273,7 +313,13 @@ test_datagen = ImageDataGenerator(
 
 ```
 
-## Generators
+## Data Generators
+
+TensorFlow's ImageDataGenerator is used to automatically load images in batches.
+
+Each image is resized to 150 × 150 pixels, normalized, and converted into tensors that can be processed by the CNN.
+
+The training generator applies data augmentation, whereas the validation and testing generators only perform normalization.
 
 
 ```
@@ -321,7 +367,16 @@ print(
 
 ```
 
-## Building the CNN model
+## Building the CNN
+
+A custom Convolutional Neural Network is created using four convolutional blocks.
+
+Each convolution layer extracts increasingly complex visual features from the images, while max pooling gradually reduces the spatial dimensions.
+
+Finally, fully connected layers perform the binary classification between cats and dogs.
+
+A Dropout layer is included to reduce overfitting.
+
 
 ```
 def build_cnn():
@@ -394,7 +449,18 @@ def build_cnn():
     return model
 
 
+```
 
+## Model Compilation
+The model is compiled using:
+
+Adam Optimizer
+Binary Crossentropy Loss
+Accuracy Metric
+
+Adam provides efficient gradient optimization, while Binary Crossentropy is the standard loss function for binary classification problems.
+
+```
 
 model = build_cnn()
 
@@ -417,7 +483,18 @@ model.summary()
 
 ```
 
-## We create call backs
+
+
+## Callbacks
+Two callbacks are used during training.
+
+Early Stopping
+
+Training automatically stops if the validation loss stops improving, preventing unnecessary epochs and reducing overfitting.
+
+Reduce Learning Rate
+
+If the validation loss stagnates, the learning rate is automatically reduced, allowing the optimizer to fine-tune the model more effectively.
 
 ```
 early_stop = EarlyStopping(
@@ -444,7 +521,11 @@ lr_reduce = ReduceLROnPlateau(
 
 ```
 
-## Training
+## Training the CNN
+The model is trained using the augmented training dataset while monitoring its performance on the validation dataset.
+
+The callbacks automatically manage the learning process by stopping training when necessary and adjusting the learning rate.
+
 
 ```
 
@@ -465,7 +546,11 @@ history = model.fit(
 
 ```
 
-## Test evaluation
+## Model Evaluation
+
+After training, the CNN is evaluated using the independent testing dataset.
+
+This provides an unbiased estimate of the model's performance on previously unseen images.
 
 ```
 test_loss, test_acc = model.evaluate(
@@ -481,7 +566,16 @@ print(
 
 ```
 
-## Now we create the curves
+## Training Curves
+Finally, the training history is visualized.
+
+Two graphs are generated:
+
+Accuracy
+Loss
+
+Comparing training and validation curves helps determine whether the model learned effectively or suffered from overfitting.
+
 
 ```
 plt.figure(figsize=(12,5))
@@ -524,3 +618,26 @@ plt.legend()
 plt.show()
 
 ```
+
+## Results
+
+The model successfully learned to classify cats and dogs with high accuracy.
+
+The use of data augmentation, dropout and early stopping helped improve generalization and reduced overfitting during training.
+
+## Conclusion
+
+This project demonstrates the complete implementation of a Convolutional Neural Network for binary image classification.
+
+The workflow includes:
+
+Dataset cleaning
+Dataset splitting
+Image preprocessing
+Data augmentation
+CNN architecture
+Model training
+Performance evaluation
+
+The obtained results indicate that CNNs are highly effective for image classification tasks and provide strong performance even with relatively simple architectures.
+
