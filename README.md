@@ -641,3 +641,40 @@ Performance evaluation
 
 The obtained results indicate that CNNs are highly effective for image classification tasks and provide strong performance even with relatively simple architectures.
 
+
+## Training duration and computational limitations
+The model was initially trained for 10 epochs in order to verify that the complete pipeline was working correctly and to observe the initial learning behavior. Afterwards, the training process was extended to a maximum of 40 epochs to allow the CNN to further improve its performance. However, due to the high computational cost of training, the process required a significant amount of time and caused high CPU utilization. Therefore, the 40-epoch training was manually interrupted before completion. The preliminary results showed that the model was successfully learning useful features, with increasing training accuracy and decreasing loss values.
+
+
+
+
+
+<img width="999" height="451" alt="image" src="https://github.com/user-attachments/assets/8384f27f-33bb-4fc2-ad63-c7d630cf4cf8" />
+
+
+
+
+
+
+
+| Epoch | Training Accuracy | Training Loss | Validation Accuracy | Validation Loss | Learning Rate |
+|------:|------------------:|--------------:|--------------------:|----------------:|--------------:|
+| 1 | 65.62% | 0.6253 | 65.41% | 0.6102 | 0.0010 |
+| 2 | 67.49% | 0.6056 | 75.25% | 0.5265 | 0.0010 |
+| 3 | 69.49% | 0.5863 | 77.79% | 0.4883 | 0.0010 |
+| 4 | 72.79% | 0.5449 | 77.39% | 0.4758 | 0.0010 |
+| 5 | 74.19% | 0.5189 | 82.11% | 0.4161 | 0.0010 |
+| 6 | 76.36% | 0.4984 | 81.25% | 0.4196 | 0.0010 |
+| 7 | 77.60% | 0.4741 | 82.83% | 0.3857 | 0.0010 |
+| 8 | 79.35% | 0.4498 | 84.45% | 0.3583 | 0.0010 |
+| 9 | 79.88% | 0.4388 | 85.60% | 0.3384 | 0.0010 |
+| 10 | 81.18% | 0.4202 | 85.36% | 0.3394 | 0.0010 |
+
+
+
+
+| Metric | Value |
+|---|---:|
+| Test Accuracy | **86.00%** |
+| Test Loss | **0.3313** |
+
