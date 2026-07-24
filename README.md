@@ -483,7 +483,7 @@ print(
 
 ## Now we create the curves
 
-
+```
 plt.figure(figsize=(12,5))
 
 
